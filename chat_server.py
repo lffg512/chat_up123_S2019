@@ -128,19 +128,18 @@ class Server:
                 """
                 # IMPLEMENTATION
                 # ---- start your code ---- #
-                pass
+                the_guys = self.group.list_me(from_name)
+                said2 = text_proc(msg["message"], from_name)
+                self.indices[from_name].add_msg_and_index(said2)
 
                 # ---- end of your code --- #
 
-                the_guys = self.group.list_me(from_name)[1:]
-                for g in the_guys:
+                for g in the_guys[1:]:
                     to_sock = self.logged_name2sock[g]
-
                     # IMPLEMENTATION
                     # ---- start your code ---- #
-                    pass
-                    mysend(
-                        to_sock, "...Remember to index the messages before sending, or search won't work")
+                    self.indices[g].add_msg_and_index(said2)
+                    mysend(to_sock, json.dumps({"action":"exchange", "from":msg["from"], "message":msg["message"]}))
 
                     # ---- end of your code --- #
 
@@ -156,7 +155,7 @@ class Server:
                     g = the_guys.pop()
                     to_sock = self.logged_name2sock[g]
                     mysend(to_sock, json.dumps(
-                        {"action": "disconnect", "msg": "everyone left, you are alone"}))
+                        {"action": "disconnect", "message": "everyone left, you are alone"}))
 # ==============================================================================
 #                 listing available peers: IMPLEMENT THIS
 # ==============================================================================
@@ -164,8 +163,9 @@ class Server:
 
                 # IMPLEMENTATION
                 # ---- start your code ---- #
-                pass
-                msg = "...needs to use self.group functions to work"
+                from_name = self.logged_sock2name[from_sock]
+                msg = self.group.list_all(from_name)
+                #msg = "...needs to use self.group functions to work"
 
                 # ---- end of your code --- #
                 mysend(from_sock, json.dumps(
@@ -177,8 +177,12 @@ class Server:
 
                 # IMPLEMENTATION
                 # ---- start your code ---- #
-                pass
-                poem = "...needs to use self.sonnet functions to work"
+                poem_indx = int(msg["target"])
+                from_name = self.logged_sock2name[from_sock]
+                print(from_name + ' asks for ', poem_indx)
+                poem = self.sonnet.get_poem(poem_indx)
+                poem = '\n'.join(poem).strip()
+                #poem = "...needs to use self.sonnet functions to work"
                 print('here:\n', poem)
 
                 # ---- end of your code --- #
@@ -199,8 +203,10 @@ class Server:
 
                 # IMPLEMENTATION
                 # ---- start your code ---- #
-                pass
-                search_rslt = "needs to use self.indices search to work"
+                term = msg["target"]
+                from_name = self.logged_sock2name[from_sock]
+                #search_rslt = "needs to use self.indices search to work"
+                search_rslt = '\n'.join([x[-1] for x in self.indices[from_name].search(term)])
                 print('server side search: ' + search_rslt)
 
                 # ---- end of your code --- #
